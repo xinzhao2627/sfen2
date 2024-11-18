@@ -9,12 +9,17 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Box, Checkbox, IconButton, Menu, MenuItem, TablePagination, TableSortLabel } from '@mui/material';
+import { Box, Checkbox, Chip, Collapse, IconButton, Menu, MenuItem, TablePagination, TableSortLabel } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { useEffect, useMemo, useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import useStore from '../useStore.js';
+import '@fontsource/inter/700.css';
+import '@fontsource/inter/600.css';
 
+// import 'bootstrap/dist/css/bootstrap.min.css';
+import '../App.css'
+import '@fontsource/inter'; 
 // compares the rows value, lower or higher value gets placed first or last depending on orderBy
 const descendingComparator = (a, b, orderBy) => {
     if (b[orderBy] < a[orderBy]) {
@@ -63,8 +68,9 @@ function ITableHead({numSelected, onRequestSort, onSelectAllClick, order, orderB
                 </TableCell>
                 {headCells.map((hc) => <TableCell 
                     key={hc.id}
-                    padding={hc.disablePadding ? 'none' : 'normal'}
+                    padding='none'//{hc.disablePadding ? 'none' : 'normal'}
                     sortDirection={orderBy === hc.id ? order : false}
+                    sx={{fontSize:'small', fontWeight:'600'}}
                 >
                     <TableSortLabel
                         active={orderBy === hc.id}
@@ -214,40 +220,71 @@ function ITable({headCells, rows, type}) {
 
     const computerRow = ({isItemSelected, labelId, r, handleMenuClick}) => (
         <>
-            <TableCell padding='checkbox'>
-                            <Checkbox
-                                sx={{
-                                    '&.Mui-checked': {
-                                        color: palette.selected, 
-                                    }
-                                }}
-                                checked={isItemSelected}
-                                inputProps={{"aria-labelledby":labelId}}
-                            />
+            <TableCell padding='checkbox' sx={{fontSize:'small'}}>
+                        <Checkbox
+                            sx={{
+                                '&.Mui-checked': {
+                                    color: palette.selected, 
+                                }
+                            }}
+                            checked={isItemSelected}
+                            inputProps={{"aria-labelledby":labelId}}
+                        />
+
+                        <Collapse>
+                            
+                        </Collapse>
+
                         </TableCell>
 
-                        <TableCell component={"th"} id={labelId} scope='row' padding='normal'>
+                        <TableCell component={"th"} id={labelId} scope='row'>
                             {r.computer_id}
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell padding='none'>
                             {r.room}
                         </TableCell>
 
-                        <TableCell >
+                        <TableCell padding='none'>
                             {r.system_unit}
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell padding='none'>
                             {r.monitor}
                         </TableCell>
-                        <TableCell>
-                            {r.condition}
+                        <TableCell padding='none'>
+                            <Chip
+                                
+                                
+                                sx={{fontWeight:'600', borderWidth:'2px', borderRadius:'6px'}}
+                                label={
+                                    (r.condition === 0) ? "Good" : 
+                                    (r.condition === 1) ? "Minor Issue" : 
+                                    (r.condition === 2) ? "Major Issue" : 
+                                    (r.condition === 3) ? "Bad" : "Unlisted"
+                                }
+                                color={
+                                    (r.condition === 0) ? "success" : 
+                                    (r.condition === 1) ? "warning" : 
+                                    (r.condition === 2) ? "secondary" : 
+                                    (r.condition === 3) ? "error" : "default"
+                                }
+                            />
                         </TableCell>
-                        <TableCell>
-                            {r.status}
+                        <TableCell padding='none' sx={{paddingLeft:'4px'}}>
+                            <Chip
+                                variant='outlined'
+                                sx={{fontWeight:'600', borderWidth:'2px', borderRadius:'6px', borderColor:`${(r.status === 0) ? '#686D76 !important' : 'primary'}`}}
+                                label={
+                                    (r.status === 0) ? "Inactive" : "Active" 
+
+                                }
+                                color={
+                                    (r.status === 0) ? "default" : "primary" 
+                                }
+                            />
                         </TableCell>
-                        <TableCell align='center'>
+                        <TableCell align='left' padding='none' sx={{paddingLeft:'4%'}}>
                             {r.pending_reports}
                         </TableCell>
                         <TableCell>
@@ -278,8 +315,10 @@ function ITable({headCells, rows, type}) {
         }, [type]   
     )
 
-    return <Box sx={{height:'500px'}}>
-        <TableContainer sx={{backgroundColor: 'white', width:'100%', height:'100%'}}>
+    return <Box sx={{border:'1px solid #DADADA'}}>
+        <TableContainer sx={{backgroundColor: 'white', width:'100%',height:'500px',
+            fontFamily: 'Inter, sans-serif',
+            '& .MuiTableCell-root': { fontFamily: 'Inter, sans-serif' },}}>
             <Table stickyHeader>
                 <ITableHead 
                     numSelected={selected.length}
@@ -298,7 +337,7 @@ function ITable({headCells, rows, type}) {
                     return <TableRow 
                         key={`row-${r.computer_id}`}
                         hover
-                        // TODO
+                        // TODO, database
                         onClick={(e) => handleCheckClick(e, r.computer_id)}
                         role="checkbox"
                         aria-checked={isItemSelected}
@@ -311,7 +350,18 @@ function ITable({headCells, rows, type}) {
             </Table>
         </TableContainer>
         <TablePagination
-            sx={{backgroundColor:'white'}}
+        sx={{
+            backgroundColor: 'white',
+            '.MuiInputBase-root':{
+                marginRight:'1em'
+            },
+            '.MuiTablePagination-displayedRows': {
+                marginTop: '1em', // Adjust this value for the "1-9 of 9" text
+            },
+            '.MuiTablePagination-selectLabel': {
+                marginTop: '1em', // Adjust this for the "Rows per page" label if needed
+            }
+        }}
             rowsPerPageOptions={[5,10,20,30]}
             component={'div'}
             count={rows.length}
@@ -319,7 +369,6 @@ function ITable({headCells, rows, type}) {
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-
         />
         <Menu
             anchorEl={anchorEl}

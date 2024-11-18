@@ -9,7 +9,8 @@
         "has_internet",
         "has_software",
         "status",
-        "condition_id"
+        "condition_id",
+        "building_code"
     ],
     "rows": [
         {
@@ -22,7 +23,8 @@
           "has_internet": 1,
           "has_software": 1,
           "status": 1,
-          "condition_id": 1
+          "condition_id": 1,
+          "building_code": "MB"
         },
         {
           "computer_id": 1290,
@@ -34,7 +36,8 @@
           "has_internet": 1,
           "has_software": 1,
           "status": 1,
-          "condition_id": 2
+          "condition_id": 2,
+          "building_code": "MB"
         },
         {
           "computer_id": 1291,
@@ -46,7 +49,8 @@
           "has_internet": 1,
           "has_software": 0,
           "status": 1,
-          "condition_id": 3
+          "condition_id": 3,
+          "building_code": "MB"
         },
         {
           "computer_id": 2003,
@@ -58,7 +62,8 @@
           "has_internet": 1,
           "has_software": 0,
           "status": 1,
-          "condition_id": 3
+          "condition_id": 3,
+          "building_code": "ANB"
         },
         {
           "computer_id": 2004,
@@ -69,8 +74,9 @@
           "has_keyboard": 0,
           "has_internet": 1,
           "has_software": 1,
-          "status": 1,
-          "condition_id": 2
+          "status": 0,
+          "condition_id": 2,
+          "building_code": "MND"
         },
         {
           "computer_id": 2005,
@@ -82,7 +88,8 @@
           "has_internet": 1,
           "has_software": 1,
           "status": 1,
-          "condition_id": 1
+          "condition_id": 1,
+          "building_code": "MB"
         },
         {
           "computer_id": 2056,
@@ -93,8 +100,9 @@
           "has_keyboard": 0,
           "has_internet": 1,
           "has_software": 1,
-          "status": 1,
-          "condition_id": 0
+          "status": 0,
+          "condition_id": 0,
+          "building_code": "MND"
         },
         {
           "computer_id": 2057,
@@ -106,7 +114,8 @@
           "has_internet": 1,
           "has_software": 0,
           "status": 1,
-          "condition_id": 3
+          "condition_id": 3,
+          "building_code": "MB"
         },
         {
           "computer_id": 2058,
@@ -118,9 +127,34 @@
           "has_internet": 1,
           "has_software": 0,
           "status": 1,
-          "condition_id": 3
+          "condition_id": 3,
+          "building_code": "MB"
+        },
+        {
+          "computer_id": 1292,
+          "room": 408,
+          "system_unit": "SYU-1292",
+          "monitor": "MON-104",
+          "has_mouse": 1,
+          "has_keyboard": 1,
+          "has_internet": 1,
+          "has_software": 1,
+          "status": 1,
+          "condition_id": 1,
+          "building_code": "MB"
+        },
+        {
+          "computer_id": 1293,
+          "room": 408,
+          "system_unit": "SYU-1293",
+          "monitor": "MON-105",
+          "has_mouse": 1,
+          "has_keyboard": 1,
+          "has_internet": 1,
+          "has_software": 1,
+          "status": 1,
+          "condition_id": 2,
+          "building_code": "MB"
         }
-      ]
-      
-
+    ]
 }
