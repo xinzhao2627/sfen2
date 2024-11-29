@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 
 import PropTypes from 'prop-types'
@@ -9,13 +10,16 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Box, Checkbox, Chip, Collapse, IconButton, Menu, MenuItem, TablePagination, TableSortLabel } from '@mui/material';
+import { Box, Checkbox, Chip, Collapse, IconButton, Menu, MenuItem, Stack, TablePagination, TableSortLabel, Typography } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { useEffect, useMemo, useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import useStore from '../useStore.js';
 import '@fontsource/inter/700.css';
 import '@fontsource/inter/600.css';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import React from "react"; 
 
 // import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css'
@@ -40,7 +44,7 @@ const getComparator = (order, orderBy) => {
 
 
 
-function ITableHead({numSelected, onRequestSort, onSelectAllClick, order, orderBy, rowCount, headCells}) {
+function ITableHead({numSelected, onRequestSort, onSelectAllClick, order, orderBy, rowCount, headCells, type}) {
     const createSortHandler = (p) => (e) => {
         onRequestSort(e, p)
     }
@@ -66,26 +70,44 @@ function ITableHead({numSelected, onRequestSort, onSelectAllClick, order, orderB
                 }}
             />
                 </TableCell>
-                {headCells.map((hc) => <TableCell 
-                    key={hc.id}
-                    padding='none'//{hc.disablePadding ? 'none' : 'normal'}
-                    sortDirection={orderBy === hc.id ? order : false}
-                    sx={{fontSize:'small', fontWeight:'600'}}
-                >
-                    <TableSortLabel
-                        active={orderBy === hc.id}
-                        direction={orderBy === hc.id ? order : 'asc'}
-                        onClick={createSortHandler(hc.id)}
-                    >
-                        {hc.label}
-                        {orderBy === hc.id ? <Box
-                            component={'span'}
-                            sx={visuallyHidden}
+                {headCells.map((hc,i) => {
+                    const collapsibleHead = () => type === "reportTable" && i === 0
+                        ? <TableCell 
+                            key={hc.id + " - collapsible"}
+                            //{hc.disablePadding ? 'none' : 'normal'}
+                            sx={{fontSize:'small', fontWeight:'600', p:0, pl:1, pr:2}}
                         >
-                            {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                        </Box> : null}
-                    </TableSortLabel>
-                </TableCell>)}
+                            Details
+                        </TableCell>
+                        : null
+                    
+
+
+                    return <React.Fragment key={'Fragment' + i}>
+                    {collapsibleHead()}
+                    <TableCell 
+                            key={hc.id}
+                            padding='none'//{hc.disablePadding ? 'none' : 'normal'}
+                            sortDirection={orderBy === hc.id ? order : false}
+                            sx={{fontSize:'small', fontWeight:'600'}}
+                        >
+                            <TableSortLabel
+                                active={orderBy === hc.id}
+                                direction={orderBy === hc.id ? order : 'asc'}
+                                onClick={createSortHandler(hc.id)}
+                            >
+                                {hc.label}
+                                {orderBy === hc.id ? <Box
+                                    component={'span'}
+                                    sx={visuallyHidden}
+                                >
+                                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                </Box> : null}
+                            </TableSortLabel>
+                        </TableCell>
+                    </React.Fragment>
+
+                    })}
                 <TableCell>
                     Action
                 </TableCell>
@@ -96,18 +118,197 @@ function ITableHead({numSelected, onRequestSort, onSelectAllClick, order, orderB
     )
 }
 
-ITableHead.propTypes = {
-    numSelected: PropTypes.number.isRequired,
-    onRequestSort: PropTypes.func.isRequired,
-    onSelectAllClick: PropTypes.func.isRequired,
-    order: PropTypes.oneOf(['asc', 'desc']).isRequired,
-    orderBy: PropTypes.string.isRequired,
-    rowCount: PropTypes.number.isRequired,
-    headCells: PropTypes.array.isRequired,
+
+function ComputerRow ({isItemSelected, labelId, r, handleMenuClick}) {
+
+    return <>
+        <TableCell padding='checkbox' sx={{fontSize:'small'}}>
+        <Checkbox
+            sx={{
+                '&.Mui-checked': {
+                    color: palette.selected, 
+                }
+            }}
+            checked={isItemSelected}
+            inputProps={{"aria-labelledby":labelId}}
+        />
+        </TableCell>
+
+        <TableCell component={"th"} id={labelId} scope='row'>
+            {r.computer_id}
+        </TableCell>
+
+        <TableCell padding='none'>
+            {r.room}
+        </TableCell>
+
+        <TableCell padding='none'>
+            {r.system_unit}
+        </TableCell>
+
+        <TableCell padding='none'>
+            {r.monitor}
+        </TableCell>
+        <TableCell padding='none'>
+            <Chip
+                
+                
+                sx={{fontWeight:'600', borderWidth:'2px', borderRadius:'6px'}}
+                label={
+                    (r.condition === 0) ? "Good" : 
+                    (r.condition === 1) ? "Minor Issue" : 
+                    (r.condition === 2) ? "Major Issue" : 
+                    (r.condition === 3) ? "Bad" : "Unlisted"
+                }
+                color={
+                    (r.condition === 0) ? "success" : 
+                    (r.condition === 1) ? "warning" : 
+                    (r.condition === 2) ? "secondary" : 
+                    (r.condition === 3) ? "error" : "default"
+                }
+            />
+        </TableCell>
+        <TableCell padding='none' sx={{paddingLeft:'4px'}}>
+            <Chip
+                variant='outlined'
+                sx={{fontWeight:'600', borderWidth:'2px', borderRadius:'6px', borderColor:`${(r.status === 0) ? '#686D76 !important' : 'primary'}`}}
+                label={
+                    (r.status === 0) ? "Inactive" : "Active" 
+
+                }
+                color={
+                    (r.status === 0) ? "default" : "primary" 
+                }
+            />
+        </TableCell>
+        <TableCell align='left' padding='none' sx={{paddingLeft:'4%'}}>
+            {r.pending_reports}
+        </TableCell>
+        <TableCell>
+            <IconButton
+                onClick={(e) => handleMenuClick(e, r)}
+                aria-haspopup="true"
+                aria-controls='row-menu'
+                sx={{
+                    "&:focus": {
+                        outline:'none'
+                    }
+                }}
+            >
+                <MoreHorizIcon/>
+            </IconButton>
+        </TableCell>
+
+    </>
 }
 
+function ReportRow ({isItemSelected, labelId, r, handleMenuClick, handleCheckClick}) {
+    const [collapseOpen, setCollapseOpen] = useState(false);
 
+    return <>
+    <TableRow
+        key={`report-row-${r.report_id}`}
+        hover
+        onClick={(e) => handleCheckClick(e, r.report_id)}
+        aria-checked={isItemSelected}
+        sx={{cursor: 'pointer'}}
+        role="checkbox"
+    >
+        <TableCell padding='checkbox' sx={{fontSize:'small'}}>
+            <Checkbox
+                sx={{
+                    '&.Mui-checked': {
+                        color: palette.selected, 
+                    }
+                }}
+                checked={isItemSelected}
+                inputProps={{"aria-labelledby":labelId}}
+            />
+        </TableCell>
+        <TableCell padding='checkbox'>
+            <IconButton
+                size='small'
+                onClick={(e, r) => {
+                    e.stopPropagation()
+                    setCollapseOpen(!collapseOpen)
+                }}
+            >
+                {collapseOpen ? <KeyboardArrowUpIcon/> : <KeyboardArrowDownIcon/>} 
+            </IconButton>
+        </TableCell>
 
+        <TableCell component={"th"} id={labelId} scope='row'>
+            {r.report_id}
+        </TableCell>
+
+        <TableCell padding='none'>
+            {r.computer_id}
+        </TableCell>
+
+        <TableCell padding='none'>
+            {r.room + " - " + r.building}
+        </TableCell>
+
+        <TableCell padding='none' sx={{paddingRight:4}}>
+            {(() => {
+                const filtered = Object.entries(r.components)
+                                    .filter(([k, v])=> v)
+                const mapped = filtered.map(([k, v], i) => filtered.length-1 === i ? k :k+", " )
+                return <>{mapped}</>
+            }) ()}
+        </TableCell>
+        <TableCell padding='none' sx={{paddingLeft:'4px'}}>
+            {r.date_submitted}
+        </TableCell>
+        <TableCell padding='none' sx={{paddingLeft:'4px'}}>
+            {r.submittee}
+        </TableCell>
+        <TableCell>
+            <IconButton
+                onClick={(e) => handleMenuClick(e, r)}
+                aria-haspopup="true"
+                aria-controls='row-menu'
+                sx={{
+                    "&:focus": {
+                        outline:'none'
+                    }
+                }}
+            >
+                <MoreHorizIcon/>
+            </IconButton>
+        </TableCell>
+    </TableRow>
+    <TableRow
+        key={'collapse-row'+r.report_id}
+    >
+        <TableCell sx={{paddingBottom:0, paddingTop:0}} colSpan={12}>
+            <Collapse in={collapseOpen} timeout='auto' unmountOnExit>
+                <Box sx={{margin:1}}>
+                    <Typography variant='h6' gutterBottom component='div'>
+                        Report Details
+                    </Typography>
+                    <Stack>
+                        {Object.entries(r.components).map( ([k, v], i)=> v 
+                            ? <Stack direction='row' key={`collapse-component-${r.report_id}-${i}`}>
+                                <Typography>{k} : {v}</Typography>
+                            </Stack>
+                            : null
+                        )}
+                        <Stack>
+                            <Typography>
+                                Comment
+                            </Typography>
+                            <Typography>
+                                {r.comment}
+                            </Typography>
+                        </Stack>
+                    </Stack>
+                </Box>
+            </Collapse>
+        </TableCell>
+    </TableRow>
+</>
+}
 
 function ITable({headCells, rows, type}) {
     const {
@@ -120,22 +321,12 @@ function ITable({headCells, rows, type}) {
         menuRow, setMenuRow,
         tableType, setTableType,
     } = useStore()
-    // const [order, setOrder] = useStor
-    // const [orderBy, setOrderBy] = useState('room')
-    // const [selected, setSelected] = useState([]);
-    // const [page, setPage] = useState(0);
-    // const [rowsPerPage, setRowsPerPage] = useState(10);
-
-    // menu mini
-    // const [anchorEl, setAnchorEl] = useState(null)
-    // const [menuRow, setMenuRow] = useState(null)
-    // console.log(headCells)
     useEffect(() =>{
         setTableType(type)
 
         // TODO
         if (type === 'computerTable') setOrderBy('room')
-        else if (type === 'pendingTable') setOrderBy('submittee')
+        else if (type === 'reportTable') setOrderBy('date_submitted')
 
     }, [type, setOrderBy, setTableType])
 
@@ -218,103 +409,6 @@ function ITable({headCells, rows, type}) {
         [order, orderBy, page, rowsPerPage, rows],
     );
 
-    const computerRow = ({isItemSelected, labelId, r, handleMenuClick}) => (
-        <>
-            <TableCell padding='checkbox' sx={{fontSize:'small'}}>
-                        <Checkbox
-                            sx={{
-                                '&.Mui-checked': {
-                                    color: palette.selected, 
-                                }
-                            }}
-                            checked={isItemSelected}
-                            inputProps={{"aria-labelledby":labelId}}
-                        />
-
-                        <Collapse>
-                            
-                        </Collapse>
-
-                        </TableCell>
-
-                        <TableCell component={"th"} id={labelId} scope='row'>
-                            {r.computer_id}
-                        </TableCell>
-
-                        <TableCell padding='none'>
-                            {r.room}
-                        </TableCell>
-
-                        <TableCell padding='none'>
-                            {r.system_unit}
-                        </TableCell>
-
-                        <TableCell padding='none'>
-                            {r.monitor}
-                        </TableCell>
-                        <TableCell padding='none'>
-                            <Chip
-                                
-                                
-                                sx={{fontWeight:'600', borderWidth:'2px', borderRadius:'6px'}}
-                                label={
-                                    (r.condition === 0) ? "Good" : 
-                                    (r.condition === 1) ? "Minor Issue" : 
-                                    (r.condition === 2) ? "Major Issue" : 
-                                    (r.condition === 3) ? "Bad" : "Unlisted"
-                                }
-                                color={
-                                    (r.condition === 0) ? "success" : 
-                                    (r.condition === 1) ? "warning" : 
-                                    (r.condition === 2) ? "secondary" : 
-                                    (r.condition === 3) ? "error" : "default"
-                                }
-                            />
-                        </TableCell>
-                        <TableCell padding='none' sx={{paddingLeft:'4px'}}>
-                            <Chip
-                                variant='outlined'
-                                sx={{fontWeight:'600', borderWidth:'2px', borderRadius:'6px', borderColor:`${(r.status === 0) ? '#686D76 !important' : 'primary'}`}}
-                                label={
-                                    (r.status === 0) ? "Inactive" : "Active" 
-
-                                }
-                                color={
-                                    (r.status === 0) ? "default" : "primary" 
-                                }
-                            />
-                        </TableCell>
-                        <TableCell align='left' padding='none' sx={{paddingLeft:'4%'}}>
-                            {r.pending_reports}
-                        </TableCell>
-                        <TableCell>
-                            <IconButton
-                                onClick={(e) => handleMenuClick(e, r)}
-                                aria-haspopup="true"
-                                aria-controls='row-menu'
-                                sx={{
-                                    "&:focus": {
-                                        outline:'none'
-                                    }
-                                }}
-                            >
-                                <MoreHorizIcon/>
-                            </IconButton>
-                        </TableCell>
-
-        </>
-    )
-
-    const renderRow = useMemo(
-        () => {
-            if (type === 'computerTable'){
-                return computerRow
-            }
-            console.log('hello')
-            return null
-        }, [type]   
-    )
-
     return <Box sx={{border:'1px solid #DADADA'}}>
         <TableContainer sx={{backgroundColor: 'white', width:'100%',height:'500px',
             fontFamily: 'Inter, sans-serif',
@@ -328,14 +422,15 @@ function ITable({headCells, rows, type}) {
                     onRequestSort={handleRequestSort}
                     rowCount={rows.length}
                     headCells={headCells}
+                    type={type}
                 />
                 <TableBody>
-                {visibleRows.map((r, i)=> {
+                {type==="computerTable"?visibleRows.map((r, i)=> {
                     const isItemSelected = selected.includes(r.computer_id)
                     const labelId = `Itable-checkbox-${i}`
 
                     return <TableRow 
-                        key={`row-${r.computer_id}`}
+                        key={`computer-row-${r.computer_id}`}
                         hover
                         // TODO, database
                         onClick={(e) => handleCheckClick(e, r.computer_id)}
@@ -343,9 +438,23 @@ function ITable({headCells, rows, type}) {
                         aria-checked={isItemSelected}
                         sx={{cursor: 'pointer'}}
                     >
-                        {renderRow({isItemSelected: isItemSelected, labelId: labelId, handleMenuClick: handleMenuClick, r: r})}   
+                        <ComputerRow/>  
                     </TableRow>
-                })}
+                }) : visibleRows.map((r,i) => {
+                    
+                    const isItemSelected = selected.includes(r.report_id)
+                    const labelId = `Itable-checkbox-${i}`
+
+                    return <ReportRow 
+                        key={'reportRow - '+i}
+                        isItemSelected={isItemSelected}
+                        labelId={labelId}
+                        r={r}
+                        handleMenuClick={handleMenuClick}
+                        handleCheckClick={handleCheckClick}
+                    />
+
+                }) }
                 </TableBody>
             </Table>
         </TableContainer>

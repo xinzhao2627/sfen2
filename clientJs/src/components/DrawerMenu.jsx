@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {Sidebar, Menu, MenuItem,  } from 'react-pro-sidebar';
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import { useState } from 'react';
@@ -13,6 +14,7 @@ import KeyboardDoubleArrowLeftOutlinedIcon from '@mui/icons-material/KeyboardDou
 import { IconButton } from '@mui/material';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css'
+import { Link } from 'react-router-dom';
 
 function DesignBox(){
 
@@ -81,15 +83,36 @@ export default function DrawerMenu() {
                 <MenuItem 
                     icon={<img src={dashboard_pic} alt='dashboard_pic' className='imgIcon'/>} 
                     className='menuItem py-2 hello'
+                    component={<a href="/dashboard"/>}
                 > 
                     <DesignBox/>
                     <span>Dashboard </span>
                 </MenuItem>
-                <MenuItem icon={<img src={laboratory_pic} alt='laboratory_pic'/>} className='menuItem py-2'> Laboratory </MenuItem>
-                <MenuItem icon={<img src={reports_pic} alt='reports_pic'/>} className='menuItem py-2'> Reports </MenuItem>
-                <MenuItem icon={<img src={inventory_pic} alt='inventory_pic'/>} className='menuItem py-2'> Inventory </MenuItem>
-                <MenuItem icon={<img src={settings1_pic} alt='settings1_pic'/>} className='menuItem py-2'> Settings </MenuItem>
-                <MenuItem icon={<img src={about_pic} alt='about_pic'/>} className='menuItem py-2'> About </MenuItem>
+                <MenuItem 
+                    icon={<img src={laboratory_pic} alt='laboratory_pic'/>} 
+                    className='menuItem py-2'
+                    component={<a href="/laboratory"/>}
+                > Laboratory </MenuItem>
+                <MenuItem 
+                    icon={<img src={reports_pic} alt='reports_pic'/>} 
+                    className='menuItem py-2'
+                    component={<a href="/report"/>}
+                > Reports </MenuItem>
+                <MenuItem 
+                    icon={<img src={inventory_pic} alt='inventory_pic'/>} 
+                    className='menuItem py-2'
+                    component={<a href="/inventory"/>}
+                > Inventory </MenuItem>
+                <MenuItem 
+                    icon={<img src={settings1_pic} alt='settings1_pic'/>} 
+                    className='menuItem py-2'
+                    component={<a href="/reports"/>}
+                > ReportModal </MenuItem>
+                <MenuItem 
+                    icon={<img src={about_pic} alt='about_pic'/>} 
+                    className='menuItem py-2'
+                    component={<a href="/itable"/>}
+                > Itable</MenuItem>
             </Menu>
           </Sidebar>
 

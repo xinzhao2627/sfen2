@@ -14,10 +14,12 @@ import '@fontsource/inter';
 import Checkbox from '@mui/material/Checkbox';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import DrawerMenu from './components/DrawerMenu'
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
 import palette from './assets/palette';
+import NavSetting from './components/NavSetting';
 
 
 function createData(computer_id, room, system_unit, monitor, status, condition, pending_reports){
@@ -59,7 +61,7 @@ function RoomBox({rooms}) {
         return rooms.map(r => {
 
             return (
-                <Grid2 item md={6} lg={6} xl={6} key={r.room}>
+                <Grid2 item="true" md={6} lg={6} xl={6} key={r.room}>
                     <CardContent 
                         key={r.room} 
                         sx={{
@@ -261,7 +263,11 @@ function Laboratory() {
 
 
 
-    return <div >
+    return <div style={{display: 'flex', height:'100vh'}}>
+        <DrawerMenu/>
+        <Stack width={'100vw'}>
+        <NavSetting/>
+        <div className='mx-4'>
         <Stack direction={'row'}>
             <LabelTop/>
             <Button variant='outlined' onClick={() => setIsCompTableOpen(!isCompTableOpen)}>
@@ -304,6 +310,10 @@ function Laboratory() {
         </Stack>
         
         }
+        </div>
+        </Stack>
+
+
 
         
     </div>

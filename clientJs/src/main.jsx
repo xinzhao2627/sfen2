@@ -6,20 +6,27 @@ import {createBrowserRouter, RouterProvider} from 'react-router-dom'
 import Laboratory from './Laboratory.jsx'
 import '@fontsource/inter'; 
 import ReportModal from './components/ReportModal.jsx'
+import Reports from './Reports.jsx'
 
 const router = createBrowserRouter(
-  [{
-    path: '/laboratory',
-    element: <Laboratory />
-  },
-  {
-    path: '/',
-    element: <App />
-  },
-  {
-    path: '/report',
-    element: <ReportModal/>
-  }],
+  [
+    {
+      path: '/laboratory',
+      element: <Laboratory />
+    },
+    {
+      path: '/',
+      element: <App />
+    },
+    {
+      path: '/report',
+      element: <Reports/>
+    },
+    {
+      path:'/try',
+      element:<ReportModal/>
+    }
+  ],
   {
     future: {
       v7_startTransition: true,

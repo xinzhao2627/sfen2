@@ -8,7 +8,7 @@ const palette = {
     wFtext: '#AOABCO',
     textLight: '#9EA3A2',
     fillUnlisted: '#DCD0D0',
-    minor: '#35408E',
+    minor: '#FCE5A7',
     strongFill: '#4488BF',
     wFhead: '#717D96',
     textWeak: '#000933',
