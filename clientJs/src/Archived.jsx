@@ -1,15 +1,16 @@
 /* eslint-disable no-unused-vars */
+
 import { Grid2, Stack } from '@mui/material';
-import reports_data from './assets/reports_data.json'
+import archived_data from './assets/archived_data.json'
 import ITable from './components/ITable';
 import DrawerMenu from './components/DrawerMenu';
 import NavSetting from './components/NavSetting';
-function Reports() {
-    function createData(report_id, room, computer_id, components, date_submitted, submittee, building, comment){
-        return {report_id, room, computer_id, components, date_submitted, submittee, building, comment}
+function Archived() {
+    function createData(report_id, room, computer_id, components, date_submitted, submittee, building, comment, date_archived, status){
+        return {report_id, room, computer_id, components, date_submitted, submittee, building, comment, date_archived, status}
     }
-    
-    const rows = reports_data.rows.map((rd) => createData( 
+
+    const rows = archived_data.rows.map((rd) => createData( 
         rd.report_id, 
         rd.room, 
         rd.computer_id,
@@ -17,7 +18,9 @@ function Reports() {
         rd.date_submitted,
         rd.submittee,
         rd.building,
-        rd.comment
+        rd.comment,
+        rd.date_archived,
+        rd.status,
     ))
     const headCells = [
         {
@@ -31,6 +34,12 @@ function Reports() {
             numeric: false,
             disablePadding: true,
             label: "Computer ID",
+        },
+        {
+            id: "status",
+            numeric: false,
+            disablePadding: true,
+            label: "Status",
         },
         {
             id: "room",
@@ -51,6 +60,12 @@ function Reports() {
             label: "Date Submitted",
         },
         {
+            id: "date_archived",
+            numeric: false,
+            disablePadding: true,
+            label: "Date Archived",
+        },
+        {
             id: "submittee",
             numeric: false,
             disablePadding: true,
@@ -58,19 +73,21 @@ function Reports() {
         },
 
     ]
-    return <div style={{display: 'flex', height:'100vh'}}>
-        <DrawerMenu/>
-        <Stack width={'100vw'}>
-            <NavSetting/>
-            <div className='mx-4'>
-                <div className="label">
-                    <div className="text-wrapper">Reports</div>
-                </div>
-                <ITable headCells={headCells} rows={rows} type='reportTable'/>
-            </div>
-        </Stack>
 
-    </div>;
+
+    return <div style={{display: 'flex', height:'100vh'}}>
+    <DrawerMenu/>
+    <Stack width={'100vw'}>
+        <NavSetting/>
+        <div className='mx-4'>
+            <div className="label">
+                <div className="text-wrapper">Archived Reports</div>
+            </div>
+            <ITable headCells={headCells} rows={rows} type='archivedTable'/>
+        </div>
+    </Stack>
+
+</div>;
 }
 
-export default Reports;
+export default Archived;

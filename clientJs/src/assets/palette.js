@@ -18,6 +18,18 @@ const palette = {
     wFstroke: '#2D3648',
     txtStrong: '#000626',
     strokeMain: '#CCCCCC',
+
+    badBg: '#F7B1B4',
+    badFont: '#7A1218',
+
+    minorBg: '#FFEDB5',
+    minorFont:'#7A5E1C',
+
+    majorBg: '#FFD099',
+    majorFont: '#8A4D0C',
+
+    goodBg: '#D5F2EC',
+    goodFont: '#2B7163',
   };
   
   export default palette;

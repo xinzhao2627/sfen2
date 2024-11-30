@@ -10,7 +10,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Box, Checkbox, Chip, Collapse, IconButton, Menu, MenuItem, Stack, TablePagination, TableSortLabel, Typography } from '@mui/material';
+import { Box, Checkbox, Chip, Collapse, IconButton, Menu, MenuItem, Stack, Tab, TablePagination, TableSortLabel, Tabs, Typography } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { useEffect, useMemo, useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
@@ -24,6 +24,7 @@ import React from "react";
 // import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css'
 import '@fontsource/inter'; 
+import { createTheme, ThemeProvider, alpha, getContrastRatio } from '@mui/material/styles';
 // compares the rows value, lower or higher value gets placed first or last depending on orderBy
 const descendingComparator = (a, b, orderBy) => {
     if (b[orderBy] < a[orderBy]) {
@@ -119,9 +120,37 @@ function ITableHead({numSelected, onRequestSort, onSelectAllClick, order, orderB
 }
 
 
-function ComputerRow ({isItemSelected, labelId, r, handleMenuClick}) {
-
-    return <>
+function ComputerRow ({isItemSelected, labelId, r, handleMenuClick, handleCheckClick}) {
+    const getChipTheme = (condition) => {
+        const baseColor = condition === 0 ? palette.goodBg :
+                          condition === 1 ? palette.minorBg :
+                          condition === 2 ? palette.majorBg :
+                          condition === 3 ? palette.badBg : palette.darkBlue;
+        const fontColor = condition === 0 ? palette.goodFont :
+                            condition === 1 ? palette.minorFont :
+                            condition === 2 ? palette.majorFont :
+                            condition === 3 ? palette.badFont : "#333333";
+        // console.log("Condition: " +condition)
+        return createTheme({
+            palette: {
+                custom: {
+                    main: baseColor,
+                    contrastText: getContrastRatio(baseColor, '#fff') > 4.5 ? '#fff' : '#111',
+                    fontColor: fontColor,
+                },
+            },
+        });
+    };
+                    
+    return <TableRow 
+        key={`computer-row-${r.computer_id}`}
+        hover
+        // TODO, database
+        onClick={(e) => handleCheckClick(e, r.computer_id)}
+        role="checkbox"
+        aria-checked={isItemSelected}
+        sx={{cursor: 'pointer'}}
+    >
         <TableCell padding='checkbox' sx={{fontSize:'small'}}>
         <Checkbox
             sx={{
@@ -150,23 +179,29 @@ function ComputerRow ({isItemSelected, labelId, r, handleMenuClick}) {
             {r.monitor}
         </TableCell>
         <TableCell padding='none'>
+        {(() => {
+            const theme = getChipTheme(r.condition)
+            return  <ThemeProvider theme={theme}>
             <Chip
-                
-                
-                sx={{fontWeight:'600', borderWidth:'2px', borderRadius:'6px'}}
+                variant='filled'
+                sx={{
+                    m: 0.5,
+                    p: 0.5,
+                    backgroundColor: theme.palette.custom.main,
+                    color: theme.palette.custom.fontColor,
+                    fontWeight:'600'
+                }}
                 label={
                     (r.condition === 0) ? "Good" : 
                     (r.condition === 1) ? "Minor Issue" : 
                     (r.condition === 2) ? "Major Issue" : 
                     (r.condition === 3) ? "Bad" : "Unlisted"
-                }
-                color={
-                    (r.condition === 0) ? "success" : 
-                    (r.condition === 1) ? "warning" : 
-                    (r.condition === 2) ? "secondary" : 
-                    (r.condition === 3) ? "error" : "default"
-                }
+                }            
             />
+            </ThemeProvider> 
+
+        }) ()}
+        
         </TableCell>
         <TableCell padding='none' sx={{paddingLeft:'4px'}}>
             <Chip
@@ -199,11 +234,31 @@ function ComputerRow ({isItemSelected, labelId, r, handleMenuClick}) {
             </IconButton>
         </TableCell>
 
-    </>
+    </TableRow>
 }
 
 function ReportRow ({isItemSelected, labelId, r, handleMenuClick, handleCheckClick}) {
     const [collapseOpen, setCollapseOpen] = useState(false);
+
+    const getChipTheme = (condition) => {
+        const baseColor = condition === 0 || condition.includes("good") ? palette.goodBg :
+                          condition === 1 || condition.includes("minor") ? palette.minorBg :
+                          condition === 2 || condition.includes("major") ? palette.majorBg :
+                          condition === 3 || condition.includes("bad") ? palette.badBg : palette.darkBlue;
+        const fontColor = condition === 0 || condition.includes("good") ? palette.goodFont :
+                            condition === 1 || condition.includes("minor") ? palette.minorFont :
+                            condition === 2 || condition.includes("major") ? palette.majorFont :
+                            condition === 3 || condition.includes("bad") ? palette.badFont : "#333333";
+        return createTheme({
+            palette: {
+                custom: {
+                    main: baseColor,
+                    contrastText: getContrastRatio(baseColor, '#fff') > 4.5 ? '#fff' : '#111',
+                    fontColor: fontColor,
+                },
+            },
+        });
+    };
 
     return <>
     <TableRow
@@ -253,7 +308,24 @@ function ReportRow ({isItemSelected, labelId, r, handleMenuClick, handleCheckCli
             {(() => {
                 const filtered = Object.entries(r.components)
                                     .filter(([k, v])=> v)
-                const mapped = filtered.map(([k, v], i) => filtered.length-1 === i ? k :k+", " )
+                const mapped = filtered.map(([k, v], i) => {
+                    const theme = getChipTheme(v);
+                    return (
+                        <ThemeProvider theme={theme} key={'chip - '+i}>
+                            <Chip
+                                variant='filled'
+                                sx={{
+                                    m: 0.5,
+                                    p: 0.5,
+                                    backgroundColor: theme.palette.custom.main,
+                                    color: theme.palette.custom.fontColor,
+                                    fontWeight:'600'
+                                }}
+                                label={k.charAt(0).toUpperCase() + k.replace("_", " ").slice(1) + ": " +v.charAt(0).toUpperCase()+v.split(" ")[0].slice(1)}
+                            />
+                        </ThemeProvider>
+                    );
+                });
                 return <>{mapped}</>
             }) ()}
         </TableCell>
@@ -281,24 +353,65 @@ function ReportRow ({isItemSelected, labelId, r, handleMenuClick, handleCheckCli
     <TableRow
         key={'collapse-row'+r.report_id}
     >
-        <TableCell sx={{paddingBottom:0, paddingTop:0}} colSpan={12}>
+        <TableCell sx={{paddingBottom:0, paddingTop:0}} colSpan={8}>
             <Collapse in={collapseOpen} timeout='auto' unmountOnExit>
                 <Box sx={{margin:1}}>
-                    <Typography variant='h6' gutterBottom component='div'>
+                    <Typography variant='h6' gutterBottom component='div' sx={{ fontFamily: 'Inter, sans-serif' }}>
                         Report Details
                     </Typography>
-                    <Stack>
-                        {Object.entries(r.components).map( ([k, v], i)=> v 
-                            ? <Stack direction='row' key={`collapse-component-${r.report_id}-${i}`}>
-                                <Typography>{k} : {v}</Typography>
-                            </Stack>
-                            : null
-                        )}
-                        <Stack>
-                            <Typography>
+                    <Stack direction={'row'} sx={{height:'100%'}}>
+                        <Table size='small' aria-label='conditions' sx={{height:'100%'}}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{fontWeight:700}}>Component</TableCell>
+                                    <TableCell sx={{fontWeight:700}}>Condition</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {Object.entries(r.components).map( ([k, v], i)=> v 
+                                    ? <TableRow direction='row' key={`collapse-component-${r.report_id}-${i}`}>
+                                       <TableCell>{k}</TableCell>
+                                       <TableCell>{v}</TableCell>
+                                    </TableRow>
+                                    : null
+                                )}
+                            </TableBody>
+                        </Table>
+
+                        <Stack sx={{width:'100%', maxHeight:'23vh',minHeight:'15vh' , border:'1px solid '+palette.strokeMain, p:1.5, borderRadius:'8px', ml:3}}>
+                            <Typography mb={1} fontSize={'20px'} sx={{ fontFamily: 'Inter, sans-serif' }}>
                                 Comment
                             </Typography>
-                            <Typography>
+                            <Typography 
+                                variant='caption'
+                                fontSize={'14px'}
+                                sx={{ 
+                                    fontFamily: 'Inter, sans-serif', 
+                                    backgroundColor: '#f9f9f9',
+                                    border:'1px solid'+palette.strokeMain,
+                                    padding:'4px',
+                                    px:'8px',
+                                    textAlign:'justify',
+                                    color: '#333', 
+                                    borderRadius:'8px', 
+                                    height:'100%', 
+                                    overflowY:'auto',
+                                    wordBreak:'break-word',
+                                    '&::-webkit-scrollbar': {
+                                        width: '4px', // scrollbar width
+                                    },
+                                    '&::-webkit-scrollbar-thumb': {
+                                        backgroundColor: '#888',
+                                        borderRadius: '4px', 
+                                    },
+                                    '&::-webkit-scrollbar-thumb:hover': {
+                                        backgroundColor: '#555', 
+                                    },
+                                    '&::-webkit-scrollbar-track': {
+                                        backgroundColor: '#f1f1f1', 
+                                    },
+                                }}
+                            >
                                 {r.comment}
                             </Typography>
                         </Stack>
@@ -311,6 +424,7 @@ function ReportRow ({isItemSelected, labelId, r, handleMenuClick, handleCheckCli
 }
 
 function ITable({headCells, rows, type}) {
+    const [tabValue, setTabValue] = useState(0);
     const {
         order, setOrder,
         orderBy, setOrderBy,
@@ -355,7 +469,11 @@ function ITable({headCells, rows, type}) {
     const handleSelectAllClick = (e) => {
         if (e.target.checked) {
             // select all
-            const newSelected = rows.map((n) => n.computer_id)
+            const newSelected = rows.map((n) => 
+                type === "computerTable" ? n.computer_id:
+                type === 'reportTable' ? n.report_id:
+                null
+            )
             setSelected(newSelected)
         } else {
             // unselect all
@@ -408,8 +526,20 @@ function ITable({headCells, rows, type}) {
             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
         [order, orderBy, page, rowsPerPage, rows],
     );
+    const tabLabel = (type === 'reportTable' || type === 'archivedTable')
+        ? ['Pending Reports', 'Archived Reports'].map((l, i) => 
+            <Tab label={l} key={'tablabel - '+i}/>
+        ) : null
 
     return <Box sx={{border:'1px solid #DADADA'}}>
+
+        {(type==='reportTable' || type==='archivedTable') && <Box>
+            {/* TODO add react dom onchange */}
+            <Tabs value={tabValue} onChange={(e, n) => setTabValue(n)}>
+                {tabLabel}
+            </Tabs>
+        </Box>
+        }
         <TableContainer sx={{backgroundColor: 'white', width:'100%',height:'500px',
             fontFamily: 'Inter, sans-serif',
             '& .MuiTableCell-root': { fontFamily: 'Inter, sans-serif' },}}>
@@ -429,17 +559,14 @@ function ITable({headCells, rows, type}) {
                     const isItemSelected = selected.includes(r.computer_id)
                     const labelId = `Itable-checkbox-${i}`
 
-                    return <TableRow 
-                        key={`computer-row-${r.computer_id}`}
-                        hover
-                        // TODO, database
-                        onClick={(e) => handleCheckClick(e, r.computer_id)}
-                        role="checkbox"
-                        aria-checked={isItemSelected}
-                        sx={{cursor: 'pointer'}}
-                    >
-                        <ComputerRow/>  
-                    </TableRow>
+                    return <ComputerRow
+                            key={'reportRow - '+i}
+                            isItemSelected={isItemSelected}
+                            labelId={labelId}
+                            r={r}
+                            handleMenuClick={handleMenuClick}
+                            handleCheckClick={handleCheckClick}
+                        />  
                 }) : visibleRows.map((r,i) => {
                     
                     const isItemSelected = selected.includes(r.report_id)
@@ -459,25 +586,25 @@ function ITable({headCells, rows, type}) {
             </Table>
         </TableContainer>
         <TablePagination
-        sx={{
-            backgroundColor: 'white',
-            '.MuiInputBase-root':{
-                marginRight:'1em'
-            },
-            '.MuiTablePagination-displayedRows': {
-                marginTop: '1em', // Adjust this value for the "1-9 of 9" text
-            },
-            '.MuiTablePagination-selectLabel': {
-                marginTop: '1em', // Adjust this for the "Rows per page" label if needed
-            }
-        }}
-            rowsPerPageOptions={[5,10,20,30]}
-            component={'div'}
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
+            sx={{
+                backgroundColor: 'white',
+                '.MuiInputBase-root':{
+                    marginRight:'1em'
+                },
+                '.MuiTablePagination-displayedRows': {
+                    marginTop: '1em', // Adjust this value for the "1-9 of 9" text
+                },
+                '.MuiTablePagination-selectLabel': {
+                    marginTop: '1em', // Adjust this for the "Rows per page" label if needed
+                }
+            }}
+                rowsPerPageOptions={[5,10,20,30]}
+                component={'div'}
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
         />
         <Menu
             anchorEl={anchorEl}
