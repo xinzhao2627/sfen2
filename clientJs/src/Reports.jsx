@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { Grid2, Stack } from '@mui/material';
+import { Button, Grid2, Stack } from '@mui/material';
 import reports_data from './assets/reports_data.json'
 import ITable from './components/ITable';
 import DrawerMenu from './components/DrawerMenu';
 import NavSetting from './components/NavSetting';
-function Reports() {
+import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
+import AddCircleIcon from '@mui/icons-material/AddCircle';function Reports() {
     function createData(report_id, room, computer_id, components, date_submitted, submittee, building, comment){
         return {report_id, room, computer_id, components, date_submitted, submittee, building, comment}
     }
@@ -21,7 +22,7 @@ function Reports() {
     ))
     const headCells = [
         {
-            id: "reports_id",
+            id: "report_id",
             numeric: false,
             disablePadding: true,
             label: "Report ID",
@@ -63,9 +64,44 @@ function Reports() {
         <Stack width={'100vw'}>
             <NavSetting/>
             <div className='mx-4'>
-                <div className="label">
-                    <div className="text-wrapper">Reports</div>
+                <div className="label my-3">
+                    <Stack direction={'row'}>
+                        <div className="text-wrapper">Reports</div>
+                        <Button 
+                            startIcon={<DownloadForOfflineIcon/>}
+                            variant='outlined'
+                            color='primary'
+                            sx={{ 
+                                textTransform: 'none', 
+                                borderRadius:'4px', 
+                                fontSize:'14px', 
+                                fontFamily: 'Inter, sans-serif',
+                                borderWidth:'2px',
+                                mx:1,
+                            }}
+                        >
+                            Download
+                        </Button>
+                        <Button 
+                            startIcon={<AddCircleIcon/>}
+                            variant='outlined'
+                            color='error'
+                            sx={{ 
+                                textTransform: 'none', 
+                                borderRadius:'4px', 
+                                fontSize:'14px', 
+                                fontFamily: 'Inter, sans-serif',
+                                borderWidth:'2px',
+                                mx:1,
+                            }}
+                        >
+                            Add Report
+                        </Button>
+                        
+                    </Stack>
+
                 </div>
+                
                 <ITable headCells={headCells} rows={rows} type='reportTable'/>
             </div>
         </Stack>

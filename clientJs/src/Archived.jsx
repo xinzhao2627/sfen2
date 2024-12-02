@@ -24,7 +24,7 @@ function Archived() {
     ))
     const headCells = [
         {
-            id: "reports_id",
+            id: "report_id",
             numeric: false,
             disablePadding: true,
             label: "Report ID",

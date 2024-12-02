@@ -10,7 +10,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Box, Checkbox, Chip, Collapse, IconButton, Menu, MenuItem, Stack, Tab, TablePagination, TableSortLabel, Tabs, Typography } from '@mui/material';
+import { Box, Button, Checkbox, Chip, Collapse, IconButton, Menu, MenuItem, Stack, Tab, TablePagination, TableSortLabel, Tabs, Typography } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { useEffect, useMemo, useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
@@ -20,11 +20,15 @@ import '@fontsource/inter/600.css';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import React from "react"; 
-
+import { useNavigate } from 'react-router-dom';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css'
 import '@fontsource/inter'; 
 import { createTheme, ThemeProvider, alpha, getContrastRatio } from '@mui/material/styles';
+import FlagIcon from '@mui/icons-material/Flag';
+import { green, red } from '@mui/material/colors';
+import ReportModal from './ReportModal.jsx';
+
 // compares the rows value, lower or higher value gets placed first or last depending on orderBy
 const descendingComparator = (a, b, orderBy) => {
     if (b[orderBy] < a[orderBy]) {
@@ -36,13 +40,13 @@ const descendingComparator = (a, b, orderBy) => {
     return 0;
 }
 
+// idk wtf this function do ...
 // check if ascn or desc, also a and b came from [...rows].sort()
 const getComparator = (order, orderBy) => {
     return order === 'desc'
         ? (a, b) => descendingComparator(a, b, orderBy)
         : (a, b) => -descendingComparator(a, b, orderBy);
 }
-
 
 
 function ITableHead({numSelected, onRequestSort, onSelectAllClick, order, orderBy, rowCount, headCells, type}) {
@@ -53,26 +57,28 @@ function ITableHead({numSelected, onRequestSort, onSelectAllClick, order, orderB
     return(
         <TableHead >
             <TableRow>
+                {type !== "archivedTable" &&
                 <TableCell padding='checkbox'>
-                <Checkbox
-                sx={{
-                    '&.Mui-checked': {
-                        color: palette.selected,
-                    },
-                    '&.MuiCheckbox-indeterminate': {
-                        color: palette.selected,
-                    },
-                }}
-                indeterminate={numSelected > 0 && numSelected < rowCount}
-                checked={rowCount > 0 && numSelected === rowCount}
-                onChange={onSelectAllClick}
-                inputProps={{
-                    'aria-label': 'select all computers',
-                }}
-            />
+                    <Checkbox
+                        sx={{
+                            '&.Mui-checked': {
+                                color: palette.selected,
+                            },
+                            '&.MuiCheckbox-indeterminate': {
+                                color: palette.selected,
+                            },
+                        }}
+                        indeterminate={numSelected > 0 && numSelected < rowCount}
+                        checked={rowCount > 0 && numSelected === rowCount}
+                        onChange={onSelectAllClick}
+                        inputProps={{
+                            'aria-label': 'select all computers',
+                        }}
+                    />
                 </TableCell>
+                }
                 {headCells.map((hc,i) => {
-                    const collapsibleHead = () => type === "reportTable" && i === 0
+                    const collapsibleHead = () => (type === "reportTable" || type ==="archivedTable") && i === 0
                         ? <TableCell 
                             key={hc.id + " - collapsible"}
                             //{hc.disablePadding ? 'none' : 'normal'}
@@ -88,9 +94,9 @@ function ITableHead({numSelected, onRequestSort, onSelectAllClick, order, orderB
                     {collapsibleHead()}
                     <TableCell 
                             key={hc.id}
-                            padding='none'//{hc.disablePadding ? 'none' : 'normal'}
+                            //{hc.disablePadding ? 'none' : 'normal'}
                             sortDirection={orderBy === hc.id ? order : false}
-                            sx={{fontSize:'small', fontWeight:'600'}}
+                            sx={{fontSize:'small', fontWeight:'600', p:1}}
                         >
                             <TableSortLabel
                                 active={orderBy === hc.id}
@@ -109,10 +115,13 @@ function ITableHead({numSelected, onRequestSort, onSelectAllClick, order, orderB
                     </React.Fragment>
 
                     })}
+                {(type !== "archivedTable" && type!=='consumableTable')?
                 <TableCell>
                     Action
-                </TableCell>
-
+                </TableCell> : type!=="archivedTable" && type==='consumableTable' ? <TableCell sx={{textAlign:'center'}}>
+                    Action 
+                </TableCell>: null
+                }
 
             </TableRow>
         </TableHead>
@@ -296,11 +305,11 @@ function ReportRow ({isItemSelected, labelId, r, handleMenuClick, handleCheckCli
             {r.report_id}
         </TableCell>
 
-        <TableCell padding='none'>
+        <TableCell>
             {r.computer_id}
         </TableCell>
 
-        <TableCell padding='none'>
+        <TableCell>
             {r.room + " - " + r.building}
         </TableCell>
 
@@ -329,7 +338,7 @@ function ReportRow ({isItemSelected, labelId, r, handleMenuClick, handleCheckCli
                 return <>{mapped}</>
             }) ()}
         </TableCell>
-        <TableCell padding='none' sx={{paddingLeft:'4px'}}>
+        <TableCell sx={{paddingLeft:'4px'}}>
             {r.date_submitted}
         </TableCell>
         <TableCell padding='none' sx={{paddingLeft:'4px'}}>
@@ -353,7 +362,7 @@ function ReportRow ({isItemSelected, labelId, r, handleMenuClick, handleCheckCli
     <TableRow
         key={'collapse-row'+r.report_id}
     >
-        <TableCell sx={{paddingBottom:0, paddingTop:0}} colSpan={8}>
+        <TableCell sx={{paddingBottom:0, paddingTop:0, border: collapseOpen ? '2px dashed '+palette.selected : 'none', width:'100%'}} colSpan={12}>
             <Collapse in={collapseOpen} timeout='auto' unmountOnExit>
                 <Box sx={{margin:1}}>
                     <Typography variant='h6' gutterBottom component='div' sx={{ fontFamily: 'Inter, sans-serif' }}>
@@ -423,8 +432,296 @@ function ReportRow ({isItemSelected, labelId, r, handleMenuClick, handleCheckCli
 </>
 }
 
+function ArchivedRow ({labelId, r}){
+    // collapsible for full details
+    const [collapseOpen, setCollapseOpen] = useState(false);
+    // status chip color
+    const getChipTheme = (s) => {
+        const baseColor = s === 1 ? palette.goodBg :palette.badBg;
+        const fontColor = s === 1 ? palette.goodFont : palette.badFont;
+        return createTheme({
+            palette: {
+                custom: {
+                    main: baseColor,
+                    contrastText: getContrastRatio(baseColor, '#fff') > 4.5 ? '#fff' : '#111',
+                    fontColor: fontColor,
+                },
+            },
+        });
+    };
+    // const getCondition = 
+    return <>
+        <TableRow
+            key={`archived-row-${r.report_id}`}
+            hover
+            role="checkbox"
+        >
+            <TableCell padding='checkbox'>
+                <IconButton
+                    size='small'
+                    onClick={(e, r) => {
+                        e.stopPropagation()
+                        setCollapseOpen(!collapseOpen)
+                    }}
+                >
+                    {collapseOpen ? <KeyboardArrowUpIcon/> : <KeyboardArrowDownIcon/>} 
+                </IconButton>
+            </TableCell>
+
+            <TableCell id={labelId} padding='none'>
+                {r.report_id}
+            </TableCell>
+
+            <TableCell>
+                {r.computer_id}
+            </TableCell>
+            {/* status chip */}
+            <TableCell padding='none' sx={{paddingRight:4}}>
+                {(() => {
+
+                        const theme = getChipTheme(r.status);
+                        return (
+                            <ThemeProvider theme={theme}>
+                                <Chip
+                                    variant='filled'
+                                    sx={{
+                                        m: 0.5,
+                                        p:0,
+                                        backgroundColor: theme.palette.custom.main,
+                                        color: theme.palette.custom.fontColor,
+                                    }}
+                                    label={r.status === 1 ? "Resolved" : "Rejected"}
+                                />
+                            </ThemeProvider>
+                        );
+                }) ()}
+            </TableCell>
+
+            <TableCell padding='none'>
+                {r.room + " - " + r.building}
+            </TableCell>
+            <TableCell padding='none' >
+            {(() => {
+                    const filtered = Object.entries(r.components)
+                                        .filter(([k, v])=> v)
+                    const mapped = filtered.map(([k, v], i) => {
+                        const theme = getChipTheme(v);
+                        return (
+                            <ThemeProvider theme={theme} key={'chip - '+i}>
+                                <Chip
+                                    
+                                    sx={{
+                                        m: 0.5,
+                                        p: 0.5,
+                                    }}
+                                    label={k.charAt(0).toUpperCase() + 
+                                        k.replace("_", " ").slice(1)
+                                    }
+                                />
+                            </ThemeProvider>
+                        );
+                    });
+                    return <>{mapped}</>
+                }) ()}
+            </TableCell>
+            <TableCell padding='none' sx={{paddingLeft:'4px'}}>
+                {r.date_submitted}
+            </TableCell>
+            <TableCell padding='none' sx={{paddingLeft:'4px'}}>
+                {r.date_archived}
+            </TableCell>
+            <TableCell padding='none' sx={{paddingLeft:'4px'}}>
+                {r.submittee}
+            </TableCell>
+        </TableRow>
+        <TableRow
+            key={'collapse-row'+r.report_id}
+        >
+            <TableCell sx={{paddingBottom:0, paddingTop:0, border: collapseOpen ? '2px dashed '+palette.selected : 'none', width:'100%'}} colSpan={12}>
+                <Collapse in={collapseOpen} timeout='auto' unmountOnExit>
+                    <Box sx={{margin:1}}>
+                        <Typography variant='h6' gutterBottom component='div' sx={{ fontFamily: 'Inter, sans-serif' }}>
+                            Report Details
+                        </Typography>
+                        <Stack direction={'row'} sx={{height:'100%'}}>
+                            <Table size='small' aria-label='conditions' sx={{height:'100%'}}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell sx={{fontWeight:700}}>Component</TableCell>
+                                        <TableCell sx={{fontWeight:700}}>Condition</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {Object.entries(r.components).map( ([k, v], i)=> v 
+                                        ? <TableRow direction='row' key={`collapse-component-${r.report_id}-${i}`}>
+                                        <TableCell>{k}</TableCell>
+                                        <TableCell>{v}</TableCell>
+                                        </TableRow>
+                                        : null
+                                    )}
+                                </TableBody>
+                            </Table>
+
+                            <Stack sx={{width:'100%', maxHeight:'23vh',minHeight:'15vh' , border:'1px solid '+palette.strokeMain, p:1.5, borderRadius:'8px', ml:3}}>
+                                <Typography mb={1} fontSize={'20px'} sx={{ fontFamily: 'Inter, sans-serif' }}>
+                                    Comment
+                                </Typography>
+                                <Typography 
+                                    variant='caption'
+                                    fontSize={'14px'}
+                                    sx={{ 
+                                        fontFamily: 'Inter, sans-serif', 
+                                        backgroundColor: '#f9f9f9',
+                                        border:'1px solid'+palette.strokeMain,
+                                        padding:'4px',
+                                        px:'8px',
+                                        textAlign:'justify',
+                                        color: '#333', 
+                                        borderRadius:'8px', 
+                                        height:'100%', 
+                                        overflowY:'auto',
+                                        wordBreak:'break-word',
+                                        '&::-webkit-scrollbar': {
+                                            width: '4px', // scrollbar width
+                                        },
+                                        '&::-webkit-scrollbar-thumb': {
+                                            backgroundColor: '#888',
+                                            borderRadius: '4px', 
+                                        },
+                                        '&::-webkit-scrollbar-thumb:hover': {
+                                            backgroundColor: '#555', 
+                                        },
+                                        '&::-webkit-scrollbar-track': {
+                                            backgroundColor: '#f1f1f1', 
+                                        },
+                                    }}
+                                >
+                                    {r.comment}
+                                </Typography>
+                            </Stack>
+                        </Stack>
+                    </Box>
+                </Collapse>
+            </TableCell>
+        </TableRow>
+    </>
+
+}
+
+function Non_ConsumableRow({isItemSelected, labelId, r, handleMenuClick, handleCheckClick}) {
+    const getTypeText = (type) => {
+        switch(type) {
+            case 1: return "System Unit";
+            case 2: return "Monitor";
+            case 3: return "Mouse";
+            case 4: return "Keyboard";
+            case 5: return "Product Key";
+            default: return "Unknown";
+        }
+    };
+
+    return (
+        <TableRow 
+            key={`non_consumable-row-${r.component_id}`}
+            hover
+            onClick={(e) => handleCheckClick(e, r.component_id)}
+            role="checkbox"
+            aria-checked={isItemSelected}
+            sx={{cursor: 'pointer'}}
+        >
+            <TableCell padding='checkbox' sx={{fontSize:'small'}}>
+                <Checkbox
+                    sx={{
+                        '&.Mui-checked': {
+                            color: palette.selected, 
+                        }
+                    }}
+                    checked={isItemSelected}
+                    inputProps={{"aria-labelledby":labelId}}
+                />
+            </TableCell>
+            <TableCell component={"th"} id={labelId} scope='row'>
+                {r.component_id}
+            </TableCell>
+            <TableCell padding='none'>
+                {getTypeText(r.reference_id)}
+            </TableCell>
+            <TableCell padding='normal'>
+                {r.location}
+            </TableCell>
+            <TableCell padding='none'>
+                {r.specs}
+            </TableCell>
+            <TableCell padding='checkbox'>
+                <FlagIcon sx={{ color: r.flagged ? palette.goodFont : palette.bad }} />
+            </TableCell>
+            <TableCell>
+                <IconButton
+                    onClick={(e) => handleMenuClick(e, r)}
+                    aria-haspopup="true"
+                    aria-controls='row-menu'
+                    sx={{
+                        "&:focus": {
+                            outline:'none'
+                        }
+                    }}
+                >
+                    <MoreHorizIcon/>
+                </IconButton>
+            </TableCell>
+        </TableRow>
+    );
+}
+
+function ConsumableRow({isItemSelected, labelId, r, handleMenuClick, handleCheckClick}) {
+    return (
+        <TableRow 
+            key={`consumable-row-${r.type}`}
+            hover
+            onClick={(e) => handleCheckClick(e, r.type)}
+            role="checkbox"
+            aria-checked={isItemSelected}
+            sx={{cursor: 'pointer'}}
+        >
+            <TableCell padding='checkbox' sx={{fontSize:'small'}}>
+                <Checkbox
+                    sx={{
+                        '&.Mui-checked': {
+                            color: palette.selected, 
+                        }
+                    }}
+                    checked={isItemSelected}
+                    inputProps={{"aria-labelledby":labelId}}
+                />
+            </TableCell>
+            <TableCell component={"th"} id={labelId} scope='row'>
+                {r.reference_id}
+            </TableCell>
+            <TableCell padding='none'>
+                {r.stock_count}
+            </TableCell>
+            <TableCell sx={{textAlign:'center'}}>
+                <IconButton
+                    onClick={(e) => handleMenuClick(e, r)}
+                    aria-haspopup="true"
+                    aria-controls='row-menu'
+                    sx={{
+                        "&:focus": {
+                            outline:'none'
+                        }
+                    }}
+                >
+                    <MoreHorizIcon/>
+                </IconButton>
+            </TableCell>
+        </TableRow>
+    );
+}
+
 function ITable({headCells, rows, type}) {
-    const [tabValue, setTabValue] = useState(0);
+    const [tabValue, setTabValue] = useState(type === "reportTable" || type==="non_consumableTable" ? 0 : 1);
+    const [computerTable_addReportModalOpen, setComputerTable_AddReportModalOpen] = useState(false);
+    const navigate = useNavigate();
     const {
         order, setOrder,
         orderBy, setOrderBy,
@@ -441,6 +738,8 @@ function ITable({headCells, rows, type}) {
         // TODO
         if (type === 'computerTable') setOrderBy('room')
         else if (type === 'reportTable') setOrderBy('date_submitted')
+        else if (type === 'archivedTable') setOrderBy('date_submitted')
+        else if (type === 'non_consumableTable') setOrderBy('location')
 
     }, [type, setOrderBy, setTableType])
 
@@ -452,7 +751,6 @@ function ITable({headCells, rows, type}) {
     
     const handleCloseMenu = () => {
         setAnchorEl(null);
-        setMenuRow(null);
     };
 
     const handleMenuAction = (action) => {
@@ -472,7 +770,9 @@ function ITable({headCells, rows, type}) {
             const newSelected = rows.map((n) => 
                 type === "computerTable" ? n.computer_id:
                 type === 'reportTable' ? n.report_id:
-                null
+                type === 'archivedTable'? n.report_id:
+                type === 'non_consumableTable' ? n.component_id:
+                type === 'consumableTable' ? n.type : null
             )
             setSelected(newSelected)
         } else {
@@ -526,21 +826,47 @@ function ITable({headCells, rows, type}) {
             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
         [order, orderBy, page, rowsPerPage, rows],
     );
+    // tabs ui  presented in the /report or /archived
     const tabLabel = (type === 'reportTable' || type === 'archivedTable')
         ? ['Pending Reports', 'Archived Reports'].map((l, i) => 
             <Tab label={l} key={'tablabel - '+i}/>
+        ) : (type === 'non_consumableTable' || type === 'consumableTable')
+        ? ['System Unit / Monitor', 'Consumables'].map((l, i) => 
+            <Tab label={l} key={'tablabel - '+i}/>
         ) : null
+
+    const handleTabChange = (e, newValue) => {
+        setTabValue(newValue);
+        if (newValue === 0) {
+            navigate((type === 'reportTable' || type === 'archivedTable') ? '/report' : '/inventory');
+        } else if (newValue === 1) {
+            navigate((type === 'reportTable' || type === 'archivedTable') ? '/archived' : '/consum');
+        }
+    };
+
+    const computerTable_reportMenuOptions = () => {
+
+        return         <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleCloseMenu}
+        sx={{}}
+    >
+            <MenuItem onClick={() => {
+                handleCloseMenu()
+                setComputerTable_AddReportModalOpen(true)}}>Report this computer</MenuItem>
+        </Menu>
+    }
 
     return <Box sx={{border:'1px solid #DADADA'}}>
 
-        {(type==='reportTable' || type==='archivedTable') && <Box>
-            {/* TODO add react dom onchange */}
-            <Tabs value={tabValue} onChange={(e, n) => setTabValue(n)}>
+        {(type==='reportTable' || type==='archivedTable' || type==='non_consumableTable' || type==='consumableTable') && <Box>
+            <Tabs value={tabValue} onChange={handleTabChange}>
                 {tabLabel}
             </Tabs>
         </Box>
         }
-        <TableContainer sx={{backgroundColor: 'white', width:'100%',height:'500px',
+        <TableContainer sx={{backgroundColor: 'white', width:'100%',maxheight:'800px', minHeight:'700px', height:'500px',
             fontFamily: 'Inter, sans-serif',
             '& .MuiTableCell-root': { fontFamily: 'Inter, sans-serif' },}}>
             <Table stickyHeader>
@@ -567,7 +893,7 @@ function ITable({headCells, rows, type}) {
                             handleMenuClick={handleMenuClick}
                             handleCheckClick={handleCheckClick}
                         />  
-                }) : visibleRows.map((r,i) => {
+                }) : type === "reportTable" ? visibleRows.map((r,i) => {
                     
                     const isItemSelected = selected.includes(r.report_id)
                     const labelId = `Itable-checkbox-${i}`
@@ -581,7 +907,45 @@ function ITable({headCells, rows, type}) {
                         handleCheckClick={handleCheckClick}
                     />
 
-                }) }
+                }) : type === "archivedTable" ? visibleRows.map((r,i) => {
+
+                    const labelId = `Itable-checkbox-${i}`
+
+                    return <ArchivedRow
+                        key={'archivedRow - '+i}
+                        labelId={labelId}
+                        r={r}
+                    />
+
+                }) :  type === "non_consumableTable" ? visibleRows.map((r,i) => {
+
+                    const isItemSelected = selected.includes(r.component_id)
+                    const labelId = `Itable-checkbox-${i}`
+
+                    return <Non_ConsumableRow
+                        key={'non_consumableRow '+ i}
+                        isItemSelected={isItemSelected}
+                        labelId={labelId}
+                        r={r}
+                        handleMenuClick={handleMenuClick}
+                        handleCheckClick={handleCheckClick}
+                    />
+                }) : type === "consumableTable" ? visibleRows.map((r,i) => {
+
+                    const isItemSelected = selected.includes(r.type)
+                    const labelId = `Itable-checkbox-${i}`
+
+                    return <ConsumableRow
+                        key={'consumableRow '+ i}
+                        isItemSelected={isItemSelected}
+                        labelId={labelId}
+                        r={r}
+                        handleMenuClick={handleMenuClick}
+                        handleCheckClick={handleCheckClick}
+                    />
+                }) : null
+                
+                }
                 </TableBody>
             </Table>
         </TableContainer>
@@ -592,10 +956,10 @@ function ITable({headCells, rows, type}) {
                     marginRight:'1em'
                 },
                 '.MuiTablePagination-displayedRows': {
-                    marginTop: '1em', // Adjust this value for the "1-9 of 9" text
+                    marginTop: '1em', 
                 },
                 '.MuiTablePagination-selectLabel': {
-                    marginTop: '1em', // Adjust this for the "Rows per page" label if needed
+                    marginTop: '1em', 
                 }
             }}
                 rowsPerPageOptions={[5,10,20,30]}
@@ -606,14 +970,15 @@ function ITable({headCells, rows, type}) {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
         />
-        <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleCloseMenu}
-            sx={{}}
-        >
-            <MenuItem onClick={handleMenuAction}>Action 1</MenuItem>
-        </Menu>
+
+        {type === "computerTable" ? computerTable_reportMenuOptions() : null}
+
+        <ReportModal
+            open={computerTable_addReportModalOpen}
+            setOpen={setComputerTable_AddReportModalOpen}
+            anchor={anchorEl}
+        />
+        
     </Box>;
 }
 

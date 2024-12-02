@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { Modal, Box, Button, TextField, MenuItem, Select, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, DialogActions, Stack, IconButton, Grid2, Chip } from '@mui/material';
@@ -103,9 +104,9 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const ReportIconButton = ({ icon: Icon, label, partsStatuses, setPartsStatuses }) => {
     const partKey = label.toLowerCase().replaceAll(" ", "");
     const partStatus = partsStatuses[partKey].background;
-    const partLabel = partStatus === palette.minor ? "Minor Issue"
-                    : partStatus === palette.major ? "Major Issue"
-                    : partStatus === palette.bad ? "Bad Condition"
+    const partLabel = partStatus === palette.minorBg ? "Minor Issue"
+                    : partStatus === palette.majorBg ? "Major Issue"
+                    : partStatus === palette.badBg ? "Bad Condition"
                     : "Condition";
     const handleClick = () => {
         setPartsStatuses(prevStatuses => {
@@ -114,17 +115,17 @@ const ReportIconButton = ({ icon: Icon, label, partsStatuses, setPartsStatuses }
             let newColor = null;
 
             if (currentStatus === 'transparent') {
-                newBackground = palette.minor;
-                newColor = palette.textStrong;
-            } else if (currentStatus === palette.minor) {
-                newBackground = palette.major;
-                newColor = 'white';
-            } else if (currentStatus === palette.major) {
-                newBackground = palette.bad;
-                newColor = 'white';
+                newBackground = palette.minorBg;
+                newColor = palette.minorFont;
+            } else if (currentStatus === palette.minorBg) {
+                newBackground = palette.majorBg;
+                newColor = palette.majorFont;
+            } else if (currentStatus === palette.majorBg) {
+                newBackground = palette.badBg;
+                newColor = palette.badFont;
             } else {
                 newBackground = 'transparent';
-                newColor = palette.textStrong;
+                newColor = palette.txtStrong;
             }
 
             return {
@@ -145,7 +146,7 @@ const ReportIconButton = ({ icon: Icon, label, partsStatuses, setPartsStatuses }
                 justifyContent: 'center',
                 alignItems: 'center',
                 padding: '8px',
-                width: '100px', 
+                width: '110px', 
                 height: '80px',
                 border: `1px solid ${palette.strokeMain}`, 
                 borderRadius: '8px',
@@ -155,12 +156,13 @@ const ReportIconButton = ({ icon: Icon, label, partsStatuses, setPartsStatuses }
             disableRipple
             onClick={handleClick}
         >
-            <Icon style={{ fontSize: '2rem' }} />
+            <Icon style={{ fontSize: '1.9rem' }} />
             <InterTypography 
                 variant='caption'
                 sx={{
                     color: partsStatuses[partKey].color,
-                    marginTop: 0.5
+                    marginTop: 0.5,
+                    fontWeight:'600',
                 }}
             >
                 {partLabel}
@@ -188,10 +190,6 @@ const gridPreset = {
 const ReportGridItem = ({ icon: Icon, label, partsStatuses, setPartsStatuses }) => {
     const partKey = label.toLowerCase().replaceAll(" ", "");
     const partStatus = partsStatuses[partKey].background;
-    const partLabel = partStatus === palette.minor ? "Minor Issue"
-                    : partStatus === palette.major ? "Major Issue"
-                    : partStatus === palette.bad ? "Bad Condition"
-                    : "Unselected";
 
     return (
         <Grid2 {...gridPreset}>
@@ -220,7 +218,7 @@ ReportGridItem.propTypes = {
     setPartsStatuses: PropTypes.func,
 };
 
-const ReportModal = () => {
+const ReportModal = ({open, setOpen, anchor}) => {
     const [partsStatuses, setPartsStatuses] = useState({
         systemunit: { background: 'transparent', color: palette.textStrong },
         monitor: { background: 'transparent', color: palette.textStrong },
@@ -231,7 +229,7 @@ const ReportModal = () => {
         other: { background: 'transparent', color: palette.textStrong },
     });
     const [commentValue, setCommentValue] = useState('');
-    const [open, setOpen] = useState(false);
+    
     const [building, setBuilding] = useState('');
     const [room, setRoom] = useState(null);
     const [computerId, setComputerId] = useState(null);
@@ -254,9 +252,6 @@ const ReportModal = () => {
 
     return (
         <div>
-            <Button variant="contained" color="primary" onClick={handleOpen}>
-                Open Report Modal
-            </Button>
             <Dialog
                 fullWidth={true}
                 maxWidth={'lg'}
