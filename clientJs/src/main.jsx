@@ -10,6 +10,7 @@ import Reports from './Reports.jsx'
 import Archived from './Archived.jsx'
 import Non_Consumable from './Non_Consumable.jsx'
 import Consumable from './Consumable.jsx'
+import Login from './Login.jsx'
 
 const router = createBrowserRouter(
   [
@@ -32,6 +33,10 @@ const router = createBrowserRouter(
     {
       path: '/inventory',
       element: <Non_Consumable/>
+    },
+    {
+      path: '/login',
+      element: <Login/>
     },
     {
       path: '/consum',
