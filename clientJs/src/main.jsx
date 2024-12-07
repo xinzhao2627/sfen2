@@ -20,7 +20,7 @@ const router = createBrowserRouter(
     },
     {
       path: '/',
-      element: <App />
+      element: <Login />
     },
     {
       path: '/report',
@@ -35,8 +35,8 @@ const router = createBrowserRouter(
       element: <Non_Consumable/>
     },
     {
-      path: '/login',
-      element: <Login/>
+      path: '/dashboard',
+      element: <App/>
     },
     {
       path: '/consum',

@@ -46,7 +46,7 @@ function Login() {
                 Report as guest
             </Button>
             <Divider sx={{m:0,mt:2, width: '100%'}} variant="middle">or</Divider>
-            <form method='post'>
+            <form >
                 <Stack>
                     <TextField
                         label={'Admin Id'}
